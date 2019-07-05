@@ -1,0 +1,238 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <!--<link rel="stylesheet" type="text/css" href="static/h-ui/css/H-ui.min.css" />
+    <link rel="stylesheet" type="text/css" href="static/h-ui.admin/css/H-ui.admin.css" />
+    <link rel="stylesheet" type="text/css" href="lib/Hui-iconfont/1.0.8/iconfont.css" />
+    <link rel="stylesheet" type="text/css" href="static/h-ui.admin/skin/default/skin.css" id="skin" />
+    <link rel="stylesheet" type="text/css" href="static/h-ui.admin/css/style.css" />-->
+    <link rel="stylesheet" type="text/css" href="../../bootstrap/frame/font-awesome-4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="../../bootstrap/frame/bootstrap2/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="../../bootstrap/frame/bootstrap-table-master/src/bootstrap-table.css">
+    <link rel="stylesheet" type="text/css" href="../../bootstrap/frame/bootstrap3-editable-1.5.1/bootstrap3-editable/css/bootstrap-editable.css">
+    <link rel="stylesheet" type="text/css" href="../../bootstrap/frame/bootstrap-fileinput-master/css/fileinput.css">
+
+    <script type="text/javascript" src="../../js/jquery-2.1.4.min.js"></script>
+    <script src="../../bootstrap/frame/jquery/jquery-3.3.1.js"></script>
+    <script src="../../bootstrap/frame/layer/layer.js"></script>
+    <script src="../../bootstrap/frame/bootstrap-table-master/src/bootstrap-table.js"></script>
+    <script src="../../bootstrap/frame/bootstrap3-editable-1.5.1/bootstrap3-editable/js/bootstrap-editable.js"></script>
+    <script type="text/javascript" src="../../bootstrap/frame/bootstrap-table-master/src/locale/bootstrap-table-en-US.js"></script>
+    <script type="text/javascript" src="../../bootstrap/frame/bootstrap-table-master/dist/extensions/editable/bootstrap-table-editable.min.js"></script>
+    <script type="text/javascript" src="../../bootstrap/frame/bootstrap2/js/bootstrap.min.js"></script>
+
+    <title>用户管理</title>
+</head>
+<body>
+<nav class="breadcrumb"><i class="Hui-iconfont">&#xe67f;</i> 首页 <span class="c-gray en">&gt;</span> 用户中心 <span class="c-gray en">&gt;</span> 用户管理 </nav>
+<table id="page"></table>
+<script>
+    $(function () {
+        initTable();//调用函数，初始化表格
+        //$("#queryBtn").bind("click", initTable); //当点击查询按钮的时候执行,bootstrap-table前端分页是不能使用搜索功能
+        //("#remove").on("click", remove);
+    });
+
+    /*function remove() {
+        var rows = $("#page").bootstrapTable('getSelections'); //一定要使用bootstrapTable显示表格
+        console.log(rows);
+        if (rows.length == 0) {// rows 主要是为了判断是否选中，下面的else内容才是主要
+            alert("请先选择要删除的记录!");
+            return;
+        } else {
+            var arrays = new Array();// 声明一个数组
+
+            $(rows).each(function () {// 通过获得选中的来进行遍历
+                arrays.push(this.vipId);// cid为获得到的整条数据中的一列
+            });
+            var id = arrays.join(','); // 获得要删除的id
+            console.log(id);
+        }
+        $.ajax({
+            type: "post",
+            url: "../vip/delVip",
+            data: {
+                vipId:vipId,
+                row:rows.length
+            },
+            dataType: 'JSON',
+            success: function (data, status) {
+                if (status == "success") {
+                    alert('删除数据成功');
+                    initTable();
+                }
+            },
+            error: function () {
+                alert('删除失败');
+            },
+            complete: function () {
+            }
+        });
+    };*/
+
+
+    function initTable() {
+        // $('#page').bootstrapTable('destroy'); //先销毁表格
+        $('#page').bootstrapTable({
+            url:"../../user/getUsers",
+            method:'post',
+            //toolbar: "#toolbar",
+            striped: true, // 是否显示行间隔色 //search : "true",
+            sidePagination: "server",
+            pageNumber: 1, //初始化加载第一页，默认第一页
+            pageList:[3,5,10],//可供选择的每页的行数
+            pageSize:5,//初始默认每页行数
+            pagination: true,
+            showRefresh: true,//刷新
+            showPaginationSwitch: true,//是否隐藏分页条
+            //showToggle:true, //是否显示详细视图和列表视图的切换按钮
+            // clickToSelect: true,点击选中
+            editable:true,
+            contentType: "application/x-www-form-urlencoded",
+            paginationPreText:"上一页",
+            paginationNextText:"下一页", //设置为 ‘limit’ 则会发送符合 RESTFul 格式的参数.
+            queryParamsType : "limit",//设置为 ‘limit’ 则会发送符合 RESTFul 格式的参数.
+            sortable: true, // 是否启用排序
+            // queryParams: queryParams, //queryParams为参数设置的函数
+            queryParams: function (params) {//自定义参数，这里的参数是传给后台的，我这是是分页用的
+                //            请求服务器数据时，你可以通过重写参数的方式添加一些额外的参数，例如 toolbar 中的参数 如果
+                //　　　　　　　queryParamsType = 'limit' ,返回参数必须包含limit, offset, search, sort, order
+                //            queryParamsType = 'undefined', 返回参数必须包含: pageSize, pageNumber, searchText, sortName, sortOrder.
+                //            返回false将会终止请求。
+                return {//这里的params是table提供的
+                    pageNum: (params.offset / params.limit) + 1, //当前页面,默认是上面设置的1(pageNumber)
+                    pageSize : params.limit ,//每一页的数据行数，默认是上面设置的5(pageSize)
+                    // username: $("#searchString_id").val() //这个就是搜索框中的内容，可以自动传到后台，搜索实现在xml中体现
+                };
+            },
+            columns: [
+                {
+                    checkbox: false
+                }, {
+                    field: 'uid',
+                    title: '用户编号'
+                },
+                {
+                    field: 'uname',
+                    title: '用户姓名'
+                    /*editable:{
+                        type:"text",
+                        title:"姓名",
+                        mode:"inline",
+                        validate:function(v){
+                            if(v=="")
+                                return "姓名不能为空";
+                        }
+                    }*/
+                },
+                {
+                    field: 'email',
+                    title: '邮箱'
+                },
+                /*{
+                    field: 'sex',
+                    title: '性别',
+                    editable:{
+                        type:"text",
+                        title:"性别",
+                        mode:"inline",
+                        validate:function(v){
+                            if(!/^(男|女)$/.test(v))
+                                return "性别不合法";
+                        }
+                    }
+                },*/
+                {
+                    field: 'tel',
+                    title: '手机号'
+                },
+                {
+                    field: 'regtime',
+                    title: '注册时间'
+                },
+                {
+                    field:'operate',
+                    title:'操作',
+                    width:'40px',
+                    align: 'center',
+                    events : 'operateEvents',
+                    formatter:'operateFormatter'
+                }],
+            onLoadSuccess: function(){  //加载成功时执行
+                console.info("加载数据成功");
+            },
+            onLoadError: function(){  //加载失败时执行
+                console.info("加载数据失败");
+            },
+            /*onEditableSave: function (field, row, oldValue, $el) {//行内编辑
+                $.ajax({
+                    type: "post",
+                    url: "../vip/updateVip",
+                    data: {
+                        _method:"put",
+                        vipId:row.vipId,
+                        name:row.name,
+                        sex:row.sex,
+                        idCard:row.idCard,
+                        phone:row.phone,
+                        level:row.level,
+                        addMonetary:row.addMonetary
+                    },
+                    dataType: 'JSON',
+                    success: function (data, status) {
+                        console.log($el);
+                        console.log(field);
+                        console.log(row);
+                        if (status == "success") {
+                            console.log('修改数据成功');
+                        }
+                    },
+                    error: function () {
+                        console.log('修改数据失败');
+                    },
+                    complete: function () {
+                    }
+                });
+            }*/
+        });
+    };
+    function operateFormatter(value, row, index) { //要进行的操作 操作函数
+        return [
+            "<button  class='remove btn btn-xs green' title='查看'>" +
+            "查看</button>"+
+            ""
+        ].join('');
+    }
+
+    /*window.operateEvents = {
+        'click .remove': function (e, value, row, index) {
+            //alert(row.vipId);
+            var vipId = row.vipId;
+            var temp = confirm("是否确认删除?");
+            if(temp){
+                $.ajax({
+                    type: "post",
+                    url: "../vip/delVip",
+                    data: {
+                        vipId:vipId
+                    },
+                    dataType: 'JSON',
+                    success: function (data, status) {
+                        if (status == "success") {
+                            alert('删除数据成功');
+                            initTable();
+                        }
+                    },
+                    error: function () {
+                        alert('删除失败');
+                    },
+                    complete: function () {
+                    }
+                });
+            }
+        }
+    };*/
+</script>
+</body>
+</html>
